@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TEDDY-XMD Pairing</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background:#000;
+    color:#e6edf3;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    padding:20px;
+}
+
+/* ================= MATRIX ================= */
+
+#matrix{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+    background:#000;
+}
+
+/* ================= STARTUP ================= */
+
+#startup-screen{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.92);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+    backdrop-filter:blur(6px);
+}
+
+.loader-circle{
+    width:90px;
+    height:90px;
+    border:4px solid rgba(0,255,200,0.15);
+    border-top:4px solid #00ffc8;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    box-shadow:0 0 25px rgba(0,255,200,0.4);
+}
+
+@keyframes spin{
+    100%{
+        transform:rotate(360deg);
+    }
+}
+
+.loading-text{
+    margin-top:25px;
+    font-family:'Orbitron',sans-serif;
+    color:#00ffc8;
+    font-size:18px;
+    letter-spacing:2px;
+    text-shadow:0 0 15px rgba(0,255,200,0.5);
+}
+
+.loading-sub{
+    margin-top:10px;
+    font-size:13px;
+    color:#8b949e;
+}
+
+/* ================= CARD ================= */
+
+#main-site{
+    width:100%;
+    display:none;
+    justify-content:center;
+    align-items:center;
+}
+
+@keyframes glowPulse{
+
+    0%,100%{
+        box-shadow:
+        0 0 20px rgba(0,255,200,0.4),
+        0 0 40px rgba(0,255,200,0.2);
+    }
+
+    50%{
+        box-shadow:
+        0 0 35px rgba(0,255,200,0.8),
+        0 0 60px rgba(0,255,200,0.4);
+    }
+}
+
+@keyframes borderMove{
+
+    0%{
+        background-position:0% 50%;
+    }
+
+    50%{
+        background-position:100% 50%;
+    }
+
+    100%{
+        background-position:0% 50%;
+    }
+}
+
+@keyframes blink{
+
+    0%,50%{
+        opacity:1;
+    }
+
+    51%,100%{
+        opacity:0;
+    }
+}
+
+.card{
+    width:100%;
+    max-width:420px;
+    background:rgba(15,15,20,0.82);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(0,255,200,0.25);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 0 30px rgba(0,255,200,0.15);
+}
+
+.banner-wrap{
+    position:relative;
+    padding:2px;
+    background:linear-gradient(
+        90deg,
+        #00ffc8,
+        #00a8ff,
+        #00ffc8
+    );
+
+    background-size:200% 200%;
+
+    animation:borderMove 3s linear infinite;
+
+    border-radius:18px 18px 0 0;
+}
+
+.banner{
+    width:100%;
+    height:180px;
+    background:url('https://files.catbox.moe/13nyhx.jpg')
+    center/cover no-repeat;
+
+    border-radius:16px 16px 0 0;
+
+    animation:glowPulse 2.5s ease-in-out infinite;
+
+    position:relative;
+}
+
+.banner::after{
+    content:'';
+    position:absolute;
+    inset:0;
+
+    background:
+    linear-gradient(
+        to bottom,
+        transparent 60%,
+        rgba(0,0,0,0.8)
+    );
+
+    border-radius:16px 16px 0 0;
+}
+
+/* ================= STATUS ================= */
+
+.status-bar{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 16px;
+    background:rgba(0,0,0,0.7);
+    font-family:'Orbitron',monospace;
+    font-size:12px;
+    color:#00ffc8;
+    border-bottom:1px solid rgba(0,255,200,0.2);
+}
+
+/* ================= BOOT ================= */
+
+.boot-screen{
+    padding:16px;
+    background:rgba(0,0,0,0.8);
+    font-family:'Orbitron',monospace;
+    font-size:11px;
+    color:#00ffc8;
+    height:120px;
+    overflow:hidden;
+    border-bottom:1px solid rgba(0,255,200,0.2);
+}
+
+.boot-line{
+    margin-bottom:4px;
+    opacity:0;
+    animation:fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn{
+    to{
+        opacity:1;
+    }
+}
+
+.cursor{
+    display:inline-block;
+    width:8px;
+    height:12px;
+    background:#00ffc8;
+    animation:blink 1s infinite;
+}
+
+/* ================= CONTENT ================= */
+
+.content{
+    padding:20px 24px 24px;
+}
+
+.title{
+    text-align:center;
+    margin-bottom:16px;
+}
+
+.title h1{
+    font-family:'Orbitron',sans-serif;
+    font-size:24px;
+    font-weight:900;
+    color:#00ffc8;
+    text-shadow:0 0 15px rgba(0,255,200,0.6);
+}
+
+.title p{
+    font-size:13px;
+    color:#8b949e;
+    margin-top:4px;
+}
+
+.counter{
+    text-align:center;
+    font-size:13px;
+    color:#8b949e;
+    margin-bottom:16px;
+}
+
+.counter span{
+    color:#00ffc8;
+    font-weight:700;
+}
+
+.label{
+    font-size:12px;
+    font-weight:600;
+    color:#00ffc8;
+    margin-bottom:8px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+}
+
+input{
+    width:100%;
+    padding:14px 16px;
+    background:rgba(0,0,0,0.6);
+    border:1px solid rgba(0,255,200,0.3);
+    border-radius:10px;
+    color:#e6edf3;
+    font-size:15px;
+    outline:none;
+    transition:0.3s;
+}
+
+input:focus{
+    border-color:#00ffc8;
+    box-shadow:0 0 12px rgba(0,255,200,0.4);
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:12px;
+    border:none;
+    border-radius:10px;
+    background:
+    linear-gradient(
+        90deg,
+        #00ffc8,
+        #00a8ff
+    );
+
+    color:#000;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover:not(:disabled){
+
+    transform:translateY(-2px);
+
+    box-shadow:
+    0 6px 20px rgba(0,255,200,0.4);
+}
+
+button:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+}
+
+.code-box{
+    background:rgba(0,0,0,0.6);
+    border:1px dashed #00ffc8;
+    border-radius:10px;
+    padding:16px;
+    text-align:center;
+    font-family:'Orbitron',sans-serif;
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:3px;
+    color:#00ffc8;
+    text-shadow:0 0 10px rgba(0,255,200,0.5);
+    display:none;
+    cursor:pointer;
+}
+
+.loader{
+    display:none;
+    text-align:center;
+    color:#00ffc8;
+    margin-top:10px;
+    font-family:'Orbitron',monospace;
+    font-size:12px;
+}
+
+.footer{
+    text-align:center;
+    margin-top:20px;
+    font-size:12px;
+    color:#8b949e;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= MATRIX ================= -->
+
+<canvas id="matrix"></canvas>
+
+<!-- ================= STARTUP ================= -->
+
+<div id="startup-screen">
+
+    <div class="loader-circle"></div>
+
+    <div class="loading-text">
+        TEDDY-XMD
+    </div>
+
+    <div class="loading-sub" id="loading-msg">
+        Initializing secure system...
+    </div>
+
+</div>
+
+<!-- ================= MAIN ================= -->
+
+<div id="main-site">
+
+<div class="card">
+
+    <div class="banner-wrap">
+        <div class="banner"></div>
+    </div>
+
+    <div class="status-bar">
+        <span id="time">00:00:00</span>
+        <span id="battery">Battery: --%</span>
+    </div>
+
+    <div class="boot-screen" id="boot-screen"></div>
+
+    <div class="content" id="main-content" style="display:none;">
+
+        <div class="title">
+            <h1>TEDDY-XMD</h1>
+            <p>Pair your WhatsApp number to get session</p>
+        </div>
+
+        <div class="counter">
+            Bots Connected:
+            <span id="count-num">0</span>
+            / 1000
+        </div>
+
+        <div class="label">
+            WhatsApp Number
+        </div>
+
+        <input
+            type="text"
+            id="number"
+            placeholder="2547×××××××××"
+            autocomplete="off"
+        >
+
+        <button id="pairBtn" onclick="getCode()">
+            Get Pairing Code
+        </button>
+
+        <div class="loader" id="loader">
+            [SYSTEM] Generating secure code...
+        </div>
+
+        <div class="label" style="margin-top:20px;">
+            Your Code
+        </div>
+
+        <div
+            class="code-box"
+            id="code-box"
+            onclick="copyCode()"
+        ></div>
+
+        <div
+            id="result"
+            style="
+            text-align:center;
+            font-size:14px;
+            min-height:20px;
+            margin-top:12px;
+            "
+        ></div>
+
+        <div class="footer">
+            TEDDY-XMD • Simple. Fast. Reliable.
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+<script>
+
+/* ================= MATRIX ================= */
+
+const canvas =
+document.getElementById('matrix');
+
+const ctx =
+canvas.getContext('2d');
+
+canvas.width =
+window.innerWidth;
+
+canvas.height =
+window.innerHeight;
+
+const letters =
+'01アイウエオカキクケコサシスセソABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+const chars =
+letters.split('');
+
+const fontSize = 14;
+
+const columns =
+canvas.width / fontSize;
+
+const drops = [];
+
+for(let i = 0; i < columns; i++){
+    drops[i] = 1;
+}
+
+function drawMatrix(){
+
+    ctx.fillStyle =
+    'rgba(0,0,0,0.06)';
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    ctx.fillStyle = '#00ff88';
+
+    ctx.font =
+    fontSize + 'px monospace';
+
+    for(let i = 0; i < drops.length; i++){
+
+        const text =
+        chars[
+            Math.floor(
+                Math.random() * chars.length
+            )
+        ];
+
+        ctx.fillText(
+            text,
+            i * fontSize,
+            drops[i] * fontSize
+        );
+
+        if(
+            drops[i] * fontSize > canvas.height
+            &&
+            Math.random() > 0.975
+        ){
+            drops[i] = 0;
+        }
+
+        drops[i]++;
+    }
+}
+
+setInterval(drawMatrix,35);
+
+window.addEventListener('resize', () => {
+
+    canvas.width =
+    window.innerWidth;
+
+    canvas.height =
+    window.innerHeight;
+
+});
+
+/* ================= BOT COUNT ================= */
+
+let currentBots =
+parseInt(
+    localStorage.getItem(
+        'teddy_xmd_bot_count'
+    )
+) || 0;
+
+document.getElementById('count-num')
+.innerText = currentBots;
+
+let currentCode = '';
+
+/* ================= STARTUP ================= */
+
+const loadingTexts = [
+
+    'Initializing secure system...',
+    'Connecting to TEDDY-XMD core...',
+    'Loading encrypted modules...',
+    'Checking server integrity...',
+    'Preparing WhatsApp engine...',
+    'Starting secure environment...',
+    'Finalizing startup...'
+
+];
+
+let loadingIndex = 0;
+
+const loadingMsg =
+document.getElementById('loading-msg');
+
+const randomDelay =
+Math.floor(Math.random() * 7000) + 3000;
+
+const loadingInterval =
+setInterval(() => {
+
+    loadingMsg.innerText =
+    loadingTexts[
+        loadingIndex % loadingTexts.length
+    ];
+
+    loadingIndex++;
+
+},900);
+
+setTimeout(() => {
+
+    clearInterval(loadingInterval);
+
+    document.getElementById('startup-screen')
+    .style.display = 'none';
+
+    document.getElementById('main-site')
+    .style.display = 'flex';
+
+    startBoot();
+
+}, randomDelay);
+
+/* ================= CLOCK ================= */
+
+function updateTime(){
+
+    const now = new Date();
+
+    const time =
+    now.toLocaleTimeString(
+        'en-US',
+        {
+            hour12:false
+        }
+    );
+
+    document.getElementById('time')
+    .textContent = time;
+}
+
+setInterval(updateTime,1000);
+
+updateTime();
+
+/* ================= BATTERY ================= */
+
+if('getBattery' in navigator){
+
+    navigator.getBattery()
+    .then(battery => {
+
+        function updateBattery(){
+
+            const level =
+            Math.round(
+                battery.level * 100
+            );
+
+            document.getElementById('battery')
+            .textContent =
+            `Battery: ${level}%`;
+        }
+
+        updateBattery();
+
+        battery.addEventListener(
+            'levelchange',
+            updateBattery
+        );
+    });
+
+}else{
+
+    document.getElementById('battery')
+    .textContent = 'Battery: N/A';
+}
+
+/* ================= BOOT ================= */
+
+function startBoot(){
+
+    const bootLines = [
+
+        '[BOOT] Initializing TEDDY-XMD core...',
+        '[OK] Loading modules...',
+        '[OK] Connecting to WhatsApp servers...',
+        '[SCAN] Checking system integrity...',
+        '[OK] Firewall bypass active',
+        '[OK] Encryption protocols loaded',
+        '[READY] System online. Awaiting input.'
+
+    ];
+
+    const bootScreen =
+    document.getElementById('boot-screen');
+
+    const mainContent =
+    document.getElementById('main-content');
+
+    let lineIndex = 0;
+
+    function showBootLine(){
+
+        if(lineIndex < bootLines.length){
+
+            const div =
+            document.createElement('div');
+
+            div.className = 'boot-line';
+
+            div.style.animationDelay =
+            `${lineIndex * 0.4}s`;
+
+            div.textContent =
+            bootLines[lineIndex];
+
+            bootScreen.appendChild(div);
+
+            lineIndex++;
+
+            setTimeout(showBootLine,600);
+
+        }else{
+
+            setTimeout(() => {
+
+                bootScreen.innerHTML =
+                '[SYSTEM READY]<span class="cursor"></span>';
+
+                setTimeout(() => {
+
+                    bootScreen.style.display =
+                    'none';
+
+                    mainContent.style.display =
+                    'block';
+
+                },1500);
+
+            },1000);
+        }
+    }
+
+    showBootLine();
+}
+
+/* ================= PAIRING ================= */
+
+async function getCode(){
+
+    const number =
+    document.getElementById('number')
+    .value
+    .trim()
+    .replace(/[^0-9]/g,'');
+
+    const loader =
+    document.getElementById('loader');
+
+    const codeBox =
+    document.getElementById('code-box');
+
+    const btn =
+    document.getElementById('pairBtn');
+
+    const result =
+    document.getElementById('result');
+
+    if(!number || number.length < 10){
+
+        result.innerText =
+        '[ERROR] Invalid number format';
+
+        return;
+    }
+
+    btn.disabled = true;
+
+    loader.style.display = 'block';
+
+    codeBox.style.display = 'none';
+
+    result.innerText = '';
+
+    try{
+
+        const res =
+        await fetch(`/code?number=${number}`);
+
+        const data =
+        await res.json();
+
+        if(data.code){
+
+            currentCode = data.code;
+
+            codeBox.innerText =
+            data.code;
+
+            codeBox.style.display =
+            'block';
+
+            result.innerText =
+            '[SUCCESS] Tap code to copy';
+
+            currentBots++;
+
+            localStorage.setItem(
+                'teddy_xmd_bot_count',
+                currentBots
+            );
+
+            document.getElementById('count-num')
+            .innerText = currentBots;
+
+        }else{
+
+            result.innerText =
+            '[ERROR] ' +
+            (data.error || 'Failed');
+        }
+
+    }catch(e){
+
+        result.innerText =
+        '[ERROR] Server unreachable';
+
+    }finally{
+
+        loader.style.display =
+        'none';
+
+        btn.disabled = false;
+    }
+}
+
+/* ================= COPY ================= */
+
+function copyCode(){
+
+    if(!currentCode) return;
+
+    navigator.clipboard.writeText(
+        currentCode
+    );
+
+    document.getElementById('result')
+    .innerText =
+    '[COPIED] Code saved to clipboard';
+
+    setTimeout(() => {
+
+        document.getElementById('result')
+        .innerText =
+        '[READY] Tap code to copy';
+
+    },2000);
+}
+
+/* ================= ENTER ================= */
+
+document.getElementById('number')
+.addEventListener('keypress',(e) => {
+
+    if(e.key === 'Enter'){
+        getCode();
+    }
+
+});
+
+</script>
+
+</body>
+</html>
